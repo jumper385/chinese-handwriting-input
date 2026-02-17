@@ -1,7 +1,7 @@
 import os
 
 from PySide6.QtCore import Qt
-from PySide6.QtGui import QKeySequence, QShortcut
+from PySide6.QtGui import QIcon, QKeySequence, QShortcut
 from PySide6.QtWidgets import QWidget, QVBoxLayout, QPushButton, QLabel, QHBoxLayout
 
 from src.ocr_inference import OCRModel
@@ -13,6 +13,7 @@ class HandwritingWindow(QWidget):
     def __init__(self):
         super().__init__()
         self.setWindowTitle("Chinese Handwriting Input")
+        self._set_window_icon()
         self.setObjectName("HandwritingWindow")
         self.setStyleSheet("QWidget#HandwritingWindow { background-color: #A8A8A8; }")
 
@@ -104,3 +105,15 @@ class HandwritingWindow(QWidget):
         success, message = self.platform_actions.insert_text_and_return(selected_char)
         self.status.setText(message)
         return success
+
+    def _set_window_icon(self):
+        base_dir = os.path.dirname(os.path.dirname(__file__))
+        icon_candidates = [
+            os.path.join(base_dir, "assets", "icons", "app_icon.jpg"),
+            os.path.join(base_dir, "icon.jpg"),
+        ]
+
+        for icon_path in icon_candidates:
+            if os.path.exists(icon_path):
+                self.setWindowIcon(QIcon(icon_path))
+                break

@@ -1,10 +1,13 @@
 # -*- mode: python ; coding: utf-8 -*-
 
 import sys
+from pathlib import Path
 
 from PyInstaller.utils.hooks import collect_all, copy_metadata
 
 block_cipher = None
+
+MAC_ICON = Path("assets/icons/app_icon.icns")
 
 
 def _bundle_for(package_name: str):
@@ -91,12 +94,13 @@ exe = EXE(
     target_arch=None,
     codesign_identity=None,
     entitlements_file=None,
+    icon=str(MAC_ICON) if sys.platform == "darwin" and MAC_ICON.exists() else None,
 )
 
 if sys.platform == "darwin":
     app = BUNDLE(
         exe,
         name='hw-chinese.app',
-        icon=None,
+        icon=str(MAC_ICON) if MAC_ICON.exists() else None,
         bundle_identifier=None,
     )
