@@ -13,4 +13,10 @@ class WindowsActions(PlatformActions):
         return None
 
     def insert_text_and_return(self, text: str):
-        return False, "Windows actions are not implemented yet."
+        return False, "Windows 平台操作暂未实现。"
+
+    def backspace_and_return(self):
+        return False, "Windows 平台操作暂未实现。"
+
+    def newline_and_return(self):
+        return False, "Windows 平台操作暂未实现。"

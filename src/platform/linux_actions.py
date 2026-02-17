@@ -114,27 +114,27 @@ class LinuxActions(PlatformActions):
 
     def insert_text_and_return(self, text: str):
         if not self._required_tools_ok():
-            return False, "Linux requires xdotool + xprop. Please install them first."
+            return False, "Linux 需要 xdotool 和 xprop，请先安装。"
 
         if not (self._has_command("xclip") or self._has_command("xsel")):
-            return False, "Linux clipboard tool missing. Install xclip or xsel."
+            return False, "缺少 Linux 剪贴板工具，请安装 xclip 或 xsel。"
 
         if not self._last_target_window_id:
-            return False, "Could not determine external window. Focus target app once, then retry."
+            return False, "无法确定外部窗口，请先聚焦目标应用一次后重试。"
 
         ok_source, source_window_id, _err = self._run(["xdotool", "getactivewindow"])
         source_window_id = source_window_id if ok_source and source_window_id else None
 
         previous_clipboard = self._clipboard_get()
         if not self._clipboard_set(text):
-            return False, "Failed to set system clipboard."
+            return False, "设置系统剪贴板失败。"
 
         ok_activate, _out, _err = self._run(
             ["xdotool", "windowactivate", "--sync", self._last_target_window_id]
         )
         if not ok_activate:
             self._clipboard_set(previous_clipboard)
-            return False, "Could not activate target app for insertion."
+            return False, "无法激活目标应用进行输入。"
 
         time.sleep(0.08)
         ok_paste, _out, _err = self._run(["xdotool", "key", "--clearmodifiers", "ctrl+v"])
@@ -146,7 +146,42 @@ class LinuxActions(PlatformActions):
             self._run(["xdotool", "windowactivate", "--sync", source_window_id])
 
         if not ok_paste:
-            return False, "Paste failed. Check desktop automation permissions and retry."
+            return False, "粘贴失败，请检查桌面自动化权限后重试。"
 
-        target_name = self._last_target_app or "target window"
-        return True, f"Inserted: {text} -> {target_name}"
+        target_name = self._last_target_app or "目标窗口"
+        return True, f"已输入：{text} -> {target_name}"
+
+    def _send_key_and_return(self, key_name: str, success_text: str):
+        if not self._required_tools_ok():
+            return False, "Linux 需要 xdotool 和 xprop，请先安装。"
+
+        if not self._last_target_window_id:
+            return False, "无法确定外部窗口，请先聚焦目标应用一次后重试。"
+
+        ok_source, source_window_id, _err = self._run(["xdotool", "getactivewindow"])
+        source_window_id = source_window_id if ok_source and source_window_id else None
+
+        ok_activate, _out, _err = self._run(
+            ["xdotool", "windowactivate", "--sync", self._last_target_window_id]
+        )
+        if not ok_activate:
+            return False, "无法激活目标应用进行按键操作。"
+
+        time.sleep(0.08)
+        ok_key, _out, _err = self._run(["xdotool", "key", "--clearmodifiers", key_name])
+
+        time.sleep(0.08)
+        if source_window_id:
+            self._run(["xdotool", "windowactivate", "--sync", source_window_id])
+
+        if not ok_key:
+            return False, "按键发送失败，请检查桌面自动化权限后重试。"
+
+        target_name = self._last_target_app or "目标窗口"
+        return True, f"{success_text} -> {target_name}"
+
+    def backspace_and_return(self):
+        return self._send_key_and_return("BackSpace", "已执行退格")
+
+    def newline_and_return(self):
+        return self._send_key_and_return("Return", "已换行")

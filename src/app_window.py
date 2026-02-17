@@ -12,7 +12,7 @@ from src.ui.draw_pad import DrawPad
 class HandwritingWindow(QWidget):
     def __init__(self):
         super().__init__()
-        self.setWindowTitle("Chinese Handwriting Input")
+        self.setWindowTitle("中文手写输入")
         self._set_window_icon()
         self.setObjectName("HandwritingWindow")
         self.setStyleSheet("QWidget#HandwritingWindow { background-color: #A8A8A8; }")
@@ -24,8 +24,8 @@ class HandwritingWindow(QWidget):
         self.pad = DrawPad(size=200)
         self.status = QLabel(
             "点击您正在输入文字的窗口，然后再点击返回此窗口。\n"
-            "1) 画出字符，2) 按 Q 键读取笔迹，3) 按数字键选择正确的推断。\n"
-            "如果输入错误，按 E 键清除画布。"
+            "1）画出字符，2）按 Q 键识别笔迹，3）按数字键选择候选字。\n"
+            "输入有误时可按 E 键清空画布，或使用退格删除上一个字符。"
         )
 
         self.candidate_buttons = []
@@ -45,9 +45,21 @@ class HandwritingWindow(QWidget):
         btn_clear = QPushButton("清空写作画布 (E)")
         btn_clear.clicked.connect(self.erase)
 
+        btn_backspace = QPushButton("退格")
+        btn_backspace.clicked.connect(self.backspace)
+
+        btn_newline = QPushButton("换行")
+        btn_newline.clicked.connect(self.newline)
+
+        btn_full_stop = QPushButton("。")
+        btn_full_stop.clicked.connect(self.insert_full_stop)
+
         controls = QHBoxLayout()
         controls.addWidget(btn_estimate)
         controls.addWidget(btn_clear)
+        controls.addWidget(btn_backspace)
+        controls.addWidget(btn_newline)
+        controls.addWidget(btn_full_stop)
 
         layout = QVBoxLayout(self)
         layout.addWidget(self.pad, alignment=Qt.AlignmentFlag.AlignCenter)
@@ -59,6 +71,12 @@ class HandwritingWindow(QWidget):
         self.shortcut_estimate.activated.connect(self.estimate)
         self.shortcut_erase = QShortcut(QKeySequence("e"), self)
         self.shortcut_erase.activated.connect(self.erase)
+        self.shortcut_backspace = QShortcut(QKeySequence(Qt.Key.Key_Backspace), self)
+        self.shortcut_backspace.activated.connect(self.backspace)
+        self.shortcut_newline = QShortcut(QKeySequence(Qt.Key.Key_Return), self)
+        self.shortcut_newline.activated.connect(self.newline)
+        self.shortcut_newline_enter = QShortcut(QKeySequence(Qt.Key.Key_Enter), self)
+        self.shortcut_newline_enter.activated.connect(self.newline)
 
         for index in range(5):
             shortcut = QShortcut(QKeySequence(str(index + 1)), self)
@@ -68,25 +86,25 @@ class HandwritingWindow(QWidget):
         self.pad.clear()
         self.candidates = []
         self._render_candidates()
-        self.status.setText("Canvas erased. Draw a new character.")
+        self.status.setText("画布已清空，请重新书写字符。")
 
     def estimate(self):
         saved = self.pad.img.save(self.temp_image_path)
         if not saved:
-            self.status.setText("Failed to save drawing for OCR.")
+            self.status.setText("保存笔迹图像失败，无法进行识别。")
             return
 
         self.candidates = self.ocr.predict_ranked(self.temp_image_path, limit=5)
         self._render_candidates()
 
         if not self.candidates:
-            self.status.setText("No character detected. Try drawing more clearly.")
+            self.status.setText("未检测到字符，请写得更清晰后重试。")
             return
 
         preview = " ".join(
             [f"{idx + 1}:{item['text']}" for idx, item in enumerate(self.candidates)]
         )
-        self.status.setText(f"Candidates: {preview}")
+        self.status.setText(f"候选结果：{preview}")
 
     def _render_candidates(self):
         for index, button in enumerate(self.candidate_buttons):
@@ -107,6 +125,24 @@ class HandwritingWindow(QWidget):
         self.platform_actions.update_last_target_app()
         selected_char = self.candidates[index]["text"]
         success, message = self.platform_actions.insert_text_and_return(selected_char)
+        self.status.setText(message)
+        return success
+
+    def backspace(self):
+        self.platform_actions.update_last_target_app()
+        success, message = self.platform_actions.backspace_and_return()
+        self.status.setText(message)
+        return success
+
+    def newline(self):
+        self.platform_actions.update_last_target_app()
+        success, message = self.platform_actions.newline_and_return()
+        self.status.setText(message)
+        return success
+
+    def insert_full_stop(self):
+        self.platform_actions.update_last_target_app()
+        success, message = self.platform_actions.insert_text_and_return("。")
         self.status.setText(message)
         return success
 

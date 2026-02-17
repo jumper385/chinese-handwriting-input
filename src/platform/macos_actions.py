@@ -65,11 +65,11 @@ class MacOSActions(PlatformActions):
 
     def insert_text_and_return(self, text: str):
         if not self._last_target_app:
-            return False, "Could not determine external app. Focus target app once, then retry."
+            return False, "无法确定外部应用，请先聚焦目标应用一次后重试。"
 
         previous_clipboard = self._get_system_clipboard_text()
         if not self._set_system_clipboard_text(text):
-            return False, "Failed to set system clipboard."
+            return False, "设置系统剪贴板失败。"
 
         try:
             app_name = self._last_target_app.replace('"', '\\"')
@@ -77,7 +77,7 @@ class MacOSActions(PlatformActions):
             ok_activate, _stdout, activate_err = self._run_osascript(activate_script)
             if not ok_activate:
                 return False, (
-                    "Could not activate target app for insertion. "
+                    "无法激活目标应用进行输入。"
                     f"{activate_err or ''}".strip()
                 )
 
@@ -86,12 +86,49 @@ class MacOSActions(PlatformActions):
             ok_paste, _stdout, paste_err = self._run_osascript(paste_script)
             if not ok_paste:
                 return False, (
-                    "Paste failed. Enable Accessibility permissions and retry. "
+                    "粘贴失败，请开启辅助功能权限后重试。"
                     f"{paste_err or ''}".strip()
                 )
 
-            return True, f"Inserted: {text} -> {self._last_target_app}"
+            return True, f"已输入：{text} -> {self._last_target_app}"
         finally:
             time.sleep(0.12)
             self._set_system_clipboard_text(previous_clipboard)
             self._reactivate_handwriting_window()
+
+    def _send_key_and_return(self, key_code: int, success_text: str):
+        if not self._last_target_app:
+            return False, "无法确定外部应用，请先聚焦目标应用一次后重试。"
+
+        try:
+            app_name = self._last_target_app.replace('"', '\\"')
+            activate_script = f'tell application "{app_name}" to activate'
+            ok_activate, _stdout, activate_err = self._run_osascript(activate_script)
+            if not ok_activate:
+                return False, (
+                    "无法激活目标应用进行按键操作。"
+                    f"{activate_err or ''}".strip()
+                )
+
+            time.sleep(0.08)
+            key_script = (
+                'tell application "System Events" to key code '
+                f'{key_code}'
+            )
+            ok_key, _stdout, key_err = self._run_osascript(key_script)
+            if not ok_key:
+                return False, (
+                    "按键发送失败，请开启辅助功能权限后重试。"
+                    f"{key_err or ''}".strip()
+                )
+
+            return True, f"{success_text} -> {self._last_target_app}"
+        finally:
+            time.sleep(0.08)
+            self._reactivate_handwriting_window()
+
+    def backspace_and_return(self):
+        return self._send_key_and_return(51, "已执行退格")
+
+    def newline_and_return(self):
+        return self._send_key_and_return(36, "已换行")
