@@ -13,6 +13,8 @@ class HandwritingWindow(QWidget):
     def __init__(self):
         super().__init__()
         self.setWindowTitle("Chinese Handwriting Input")
+        self.setObjectName("HandwritingWindow")
+        self.setStyleSheet("QWidget#HandwritingWindow { background-color: #A8A8A8; }")
 
         self.ocr = OCRModel()
         self.platform_actions = create_platform_actions()
