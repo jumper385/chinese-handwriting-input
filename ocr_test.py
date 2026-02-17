@@ -1,6 +1,6 @@
 import time
 import argparse
-from paddleocr import PaddleOCR
+from src.ocr_inference import OCRModel
 
 parser = argparse.ArgumentParser(description="A simple script using argparse.")
 parser.add_argument("filepath", help="filepath of file")
@@ -16,12 +16,7 @@ def ms(t):
     return 1000.0 * t
 
 t0 = now()
-ocr = PaddleOCR(
-    use_doc_orientation_classify=False,
-    use_doc_unwarping=False,
-    use_textline_orientation=False, 
-    text_det_thresh=0.5,
-    lang="ch")
+ocr = OCRModel()
 t1 = now()
 print(f"Init (load model): {ms(t1 - t0):.1f} ms")
 
@@ -32,18 +27,11 @@ if not RUN_BYPASS:
         output = []
 
         t0 = now()
-        result = ocr.predict(
-            input=args.filepath)
-        for res in result:
-            output = res.get("rec_texts", [])
+        result = ocr.predict(args.filepath)
         t1 = now()
 
         delta = t1 - t0
-        print(f"Init (Predict Round {idx + 1}): {ms(delta):.1f} ms; Result = {output}")
+        print(f"Init (Predict Round {idx + 1}): {ms(delta):.1f} ms; Result = {result}")
 
-result = ocr.predict(
-        input = args.filepath)
-
-for res in result:
-    output = res.get("rec_texts", [])
-    print(output)
+result = ocr.predict(args.filepath)
+print(result)
