@@ -1,4 +1,5 @@
 import os
+import tempfile
 
 from PySide6.QtCore import Qt
 from PySide6.QtGui import QIcon, QKeySequence, QShortcut
@@ -8,6 +9,14 @@ from src.ocr_inference import OCRModel
 from src.platform.factory import create_platform_actions
 from src.ui.draw_pad import DrawPad
 
+# deals with permission issues
+import string
+import random
+
+def generate_random_string(n):
+    """Generates a random string of length n containing letters and digits."""
+    characters = string.ascii_letters + string.digits
+    return ''.join(random.choices(characters, k=n))
 
 class HandwritingWindow(QWidget):
     def __init__(self):
@@ -19,7 +28,9 @@ class HandwritingWindow(QWidget):
 
         self.ocr = OCRModel()
         self.platform_actions = create_platform_actions()
-        self.temp_image_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), "char.png")
+
+        file_entropy = generate_random_string(6)
+        self.temp_image_path = os.path.join(tempfile.gettempdir(), f"hw_chinese_char{file_entropy}.png")
 
         self.pad = DrawPad(size=200)
         self.status = QLabel(
