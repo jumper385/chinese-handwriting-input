@@ -41,7 +41,7 @@ tar \
 
 python3 -m venv --copies "$VENV_INSTALL_DIR"
 "$VENV_INSTALL_DIR/bin/pip" install --upgrade pip wheel setuptools
-"$VENV_INSTALL_DIR/bin/pip" install -r "$APP_INSTALL_DIR/cpu-requirements.txt"
+"$VENV_INSTALL_DIR/bin/pip" install -r "$APP_INSTALL_DIR/gpu-requirements.txt"
 "$VENV_INSTALL_DIR/bin/pip" install -r "$APP_INSTALL_DIR/requirements.txt"
 
 cat > "$DEBIAN_DIR/control" <<EOF

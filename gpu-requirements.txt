@@ -47,7 +47,10 @@ opencv-contrib-python==4.10.0.84
 opt-einsum==3.3.0
 packaging==26.0
 paddleocr==3.4.0
+
+--extra-index-url https://www.paddlepaddle.org.cn/packages/stable/cu130/
 paddlepaddle-gpu==3.3.0
+
 paddlex[ocr]==3.4.2
 pandas==3.0.0
 pillow==12.1.1
