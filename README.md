@@ -1,58 +1,52 @@
-handwriting input for chinese characters
-- input handwritten chinese characters
-- OCR and present the suggested characters in confidence rank (if theres multiple)
-- user selects with 1,2,3, etc. or click the character
-- selected character gets inserted into the current cursor location the user is typing into (external word processor, email, etc.)
-- q to estimate; e to erase
+# Chinese handwriting input helper
 
-## Build standalone binaries (macOS, Linux, Windows)
+- Input handwritten Chinese characters.
+- OCR returns ranked candidate characters.
+- Select by number key or button.
+- Selected character is inserted into the active external app.
+- `q` to estimate, `e` to erase.
 
-This repo includes:
-- `hw-chinese.spec` for PyInstaller
-- `.github/workflows/build-binaries.yml` for GitHub Actions matrix builds
+## Linux packaging: Option B (quick `.deb` with bundled venv)
 
-### Local build
+This repo uses a Debian package flow.
 
-Build on each target OS natively (do not cross-compile):
+### Build quick `.deb`
 
-1. Create and activate a virtual environment
-	 - macOS/Linux:
-		 - `python3 -m venv .venv`
-		 - `source .venv/bin/activate`
-	 - Windows (PowerShell):
-		 - `py -m venv .venv`
-		 - `.venv\Scripts\Activate.ps1`
+Run on Ubuntu/Debian:
 
-2. Install dependencies
-	 - `python -m pip install --upgrade pip wheel setuptools`
-	 - `pip install -r cpu-requirements.txt`
-	 - `pip install pyinstaller`
+1. Install packaging prerequisites:
+   - `sudo apt-get update`
+   - `sudo apt-get install -y dpkg-dev python3 python3-venv`
 
-3. Build
-	 - (macOS, optional when changing icon image) regenerate icon assets:
-		 - `chmod +x scripts/generate_icons_macos.sh`
-		 - `./scripts/generate_icons_macos.sh icon.jpg`
-	 - `pyinstaller --noconfirm --clean hw-chinese.spec`
+2. Build package:
+   - `chmod +x scripts/build_deb_quick.sh`
+   - `./scripts/build_deb_quick.sh 0.1.0 amd64`
 
-4. Run built app/binary
-	 - Output folder: `dist/hw-chinese/`
-	 - macOS/Linux:
-		 - `./dist/hw-chinese/hw-chinese`
-	 - Windows:
-		 - `dist\hw-chinese\hw-chinese.exe`
+3. Install package:
+   - `sudo dpkg -i build-deb/hw-chinese_0.1.0_amd64.deb`
 
-### CI build (all 3 OSes)
+4. Launch app:
+   - `hw-chinese`
 
-Push to `main` or trigger manually via GitHub Actions (`Build standalone binaries`).
-Artifacts are uploaded per OS as:
-- `hw-chinese-Linux`
-- `hw-chinese-macOS`
-- `hw-chinese-Windows`
+### What gets installed
 
-On macOS runners, CI regenerates `assets/icons/app_icon.icns` and `assets/icons/app_icon.jpg` from `icon.jpg` before building so the packaged app icon stays in sync with the source image.
+- App source: `/opt/hw-chinese/app`
+- Bundled virtualenv: `/opt/hw-chinese/venv`
+- Launcher: `/usr/bin/hw-chinese`
+- Desktop entry: `/usr/share/applications/hw-chinese.desktop`
 
-### Platform notes
+### Runtime Linux dependencies
 
-- Linux runtime requires: `xdotool`, `xprop` (from `x11-utils`), and `xclip` or `xsel`.
-- macOS may require Accessibility permissions for automation/paste behavior.
-- Windows binary builds, but text insertion currently returns "not implemented yet" in `src/platform/windows_actions.py`.
+Install if missing:
+
+- `xdotool`
+- `x11-utils`
+- `xclip` or `xsel`
+
+Example:
+
+- `sudo apt-get install -y xdotool x11-utils xclip`
+
+### CI
+
+GitHub Actions now builds Debian artifacts with `.github/workflows/build-deb.yml` and uploads `build-deb/*.deb`.
