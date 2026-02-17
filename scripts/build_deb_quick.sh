@@ -55,6 +55,34 @@ Description: Chinese handwriting input helper
  OCR handwriting helper with ranked candidate selection and text insertion.
 EOF
 
+cat > "$DEBIAN_DIR/postinst" <<'EOF'
+#!/usr/bin/env bash
+set -e
+
+missing=0
+
+if ! command -v xdotool >/dev/null 2>&1; then
+  echo "[hw-chinese] WARNING: xdotool is missing. Install: sudo apt-get install -y xdotool" >&2
+  missing=1
+fi
+
+if ! command -v xprop >/dev/null 2>&1; then
+  echo "[hw-chinese] WARNING: xprop is missing. Install: sudo apt-get install -y x11-utils" >&2
+  missing=1
+fi
+
+if ! command -v xclip >/dev/null 2>&1 && ! command -v xsel >/dev/null 2>&1; then
+  echo "[hw-chinese] WARNING: xclip/xsel missing. Install one: sudo apt-get install -y xclip" >&2
+  missing=1
+fi
+
+if [[ "$missing" -eq 1 ]]; then
+  echo "[hw-chinese] Some optional runtime tools appear missing; text insertion may fail until installed." >&2
+fi
+
+exit 0
+EOF
+
 cat > "$PKG_ROOT/usr/bin/$APP_NAME" <<'EOF'
 #!/usr/bin/env bash
 exec /opt/hw-chinese/venv/bin/python /opt/hw-chinese/app/main.py "$@"
@@ -72,6 +100,7 @@ Categories=Utility;
 EOF
 
 chmod 0755 "$PKG_ROOT/usr/bin/$APP_NAME"
+chmod 0755 "$DEBIAN_DIR/postinst"
 chmod 0644 "$DEBIAN_DIR/control" "$PKG_ROOT/usr/share/applications/$APP_NAME.desktop"
 
 OUTPUT_DEB="$BUILD_ROOT/${APP_NAME}_${VERSION}_${ARCH}.deb"

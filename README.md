@@ -28,6 +28,10 @@ Run on Ubuntu/Debian:
 4. Launch app:
    - `hw-chinese`
 
+5. Uninstall package:
+   - `chmod +x scripts/uninstall_hw_chinese.sh`
+   - `./scripts/uninstall_hw_chinese.sh`
+
 ### What gets installed
 
 - App source: `/opt/hw-chinese/app`
@@ -42,6 +46,8 @@ Install if missing:
 - `xdotool`
 - `x11-utils`
 - `xclip` or `xsel`
+
+During install, package `postinst` also prints warnings if these runtime tools are still missing.
 
 Example:
 
