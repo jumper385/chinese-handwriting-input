@@ -7,7 +7,7 @@ on:
   pull_request:
 
 jobs:
-  build-deb:
+  build-gpu-deb:
     runs-on: ubuntu-latest
 
     steps:
@@ -27,11 +27,40 @@ jobs:
       - name: Build quick .deb (bundled venv)
         run: |
           chmod +x scripts/build_deb_quick.sh
-          ./scripts/build_deb_quick.sh 0.1.${{ github.run_number }} amd64
+          ./scripts/build_deb_quick.sh 0.1.${{ github.run_number }} amd64 gpu
 
       - name: Upload .deb artifact
         uses: actions/upload-artifact@v4
         with:
-          name: hw-chinese-deb
+          name: hw-chinese-deb-gpu
+          path: build-deb/*.deb
+          if-no-files-found: error
+
+  build-cpu-deb:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Ensure packaging tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y dpkg-dev
+
+      - name: Build quick .deb (bundled venv)
+        run: |
+          chmod +x scripts/build_deb_quick.sh
+          ./scripts/build_deb_quick.sh 0.1.${{ github.run_number }} amd64 cpu
+
+      - name: Upload .deb artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: hw-chinese-deb-cpu
           path: build-deb/*.deb
           if-no-files-found: error

@@ -4,6 +4,7 @@ set -euo pipefail
 APP_NAME="hw-chinese"
 VERSION="${1:-0.1.0}"
 ARCH="${2:-amd64}"
+ACCELERATOR="${3:-none}"
 
 ROOT_DIR="$(cd "$(dirname "$0")/.." && pwd)"
 BUILD_ROOT="$ROOT_DIR/build-deb"
@@ -41,7 +42,11 @@ tar \
 
 python3 -m venv --copies "$VENV_INSTALL_DIR"
 "$VENV_INSTALL_DIR/bin/pip" install --upgrade pip wheel setuptools
-"$VENV_INSTALL_DIR/bin/pip" install -r "$APP_INSTALL_DIR/gpu-requirements.txt"
+if [[ "$ACCELERATOR" == "gpu" ]]; then
+  "$VENV_INSTALL_DIR/bin/pip" install -r "$APP_INSTALL_DIR/gpu-requirements.txt"
+else
+  "$VENV_INSTALL_DIR/bin/pip" install -r "$APP_INSTALL_DIR/cpu-requirements.txt"
+fi
 "$VENV_INSTALL_DIR/bin/pip" install -r "$APP_INSTALL_DIR/requirements.txt"
 
 cat > "$DEBIAN_DIR/control" <<EOF
