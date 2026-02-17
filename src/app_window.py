@@ -22,7 +22,11 @@ class HandwritingWindow(QWidget):
         self.temp_image_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), "char.png")
 
         self.pad = DrawPad(size=200)
-        self.status = QLabel("Draw a character. Press q to estimate, e to erase.")
+        self.status = QLabel(
+            "点击您正在输入文字的窗口，然后再点击返回此窗口。\n"
+            "1) 画出字符，2) 按 Q 键读取笔迹，3) 按数字键选择正确的推断。\n"
+            "如果输入错误，按 E 键清除画布。"
+        )
 
         self.candidate_buttons = []
         candidate_row = QHBoxLayout()
@@ -35,10 +39,10 @@ class HandwritingWindow(QWidget):
 
         self.candidates = []
 
-        btn_estimate = QPushButton("Estimate (q)")
+        btn_estimate = QPushButton("开始笔迹推断 (Q)")
         btn_estimate.clicked.connect(self.estimate)
 
-        btn_clear = QPushButton("Erase (e)")
+        btn_clear = QPushButton("清空写作画布 (E)")
         btn_clear.clicked.connect(self.erase)
 
         controls = QHBoxLayout()
