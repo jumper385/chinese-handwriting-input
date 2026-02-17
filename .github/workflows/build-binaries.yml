@@ -36,6 +36,12 @@ jobs:
           pip install -r cpu-requirements.txt
           pip install pyinstaller
 
+      - name: Generate macOS app icon assets
+        if: runner.os == 'macOS'
+        run: |
+          chmod +x scripts/generate_icons_macos.sh
+          ./scripts/generate_icons_macos.sh icon.jpg
+
       - name: Build with PyInstaller
         run: pyinstaller --noconfirm --clean hw-chinese.spec
 

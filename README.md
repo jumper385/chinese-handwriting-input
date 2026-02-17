@@ -29,6 +29,9 @@ Build on each target OS natively (do not cross-compile):
 	 - `pip install pyinstaller`
 
 3. Build
+	 - (macOS, optional when changing icon image) regenerate icon assets:
+		 - `chmod +x scripts/generate_icons_macos.sh`
+		 - `./scripts/generate_icons_macos.sh icon.jpg`
 	 - `pyinstaller --noconfirm --clean hw-chinese.spec`
 
 4. Run built app/binary
@@ -45,6 +48,8 @@ Artifacts are uploaded per OS as:
 - `hw-chinese-Linux`
 - `hw-chinese-macOS`
 - `hw-chinese-Windows`
+
+On macOS runners, CI regenerates `assets/icons/app_icon.icns` and `assets/icons/app_icon.jpg` from `icon.jpg` before building so the packaged app icon stays in sync with the source image.
 
 ### Platform notes
 
