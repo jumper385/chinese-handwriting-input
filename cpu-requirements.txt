@@ -28,7 +28,7 @@ opt-einsum==3.3.0
 packaging==26.0
 paddleocr==3.4.0
 paddlepaddle==3.3.0
-paddlex==3.4.2
+paddlex[ocr]==3.4.2
 pandas==3.0.0
 pillow==12.1.0
 prettytable==3.17.0

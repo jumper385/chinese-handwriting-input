@@ -48,7 +48,7 @@ opt-einsum==3.3.0
 packaging==26.0
 paddleocr==3.4.0
 paddlepaddle-gpu==3.3.0
-paddlex==3.4.2
+paddlex[ocr]==3.4.2
 pandas==3.0.0
 pillow==12.1.1
 prettytable==3.17.0
